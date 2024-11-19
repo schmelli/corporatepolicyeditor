@@ -30,6 +30,9 @@
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-env": "^7.22.5"
   },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "author": "",
   "license": "MIT"
 }
