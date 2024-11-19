@@ -138,3 +138,84 @@ body {
 .hidden {
     display: none !important;
 }
+
+/* Global Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+/* Editor Styles */
+.editor-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-toolbar {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.editor-content {
+    flex-grow: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+/* Document Structure Tree */
+.structure-tree {
+    padding: 8px;
+}
+
+.structure-tree-item {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.structure-tree-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Custom Button Styles */
+.action-button {
+    min-width: 40px !important;
+    width: 40px;
+    height: 40px;
+    padding: 8px !important;
+    margin: 4px !important;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .editor-toolbar {
+        flex-wrap: wrap;
+    }
+    
+    .action-button {
+        min-width: 36px !important;
+        width: 36px;
+        height: 36px;
+    }
+}

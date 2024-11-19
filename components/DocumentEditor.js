@@ -3,6 +3,35 @@ const MonacoEditor = require('@monaco-editor/react').default;
 const { marked } = require('marked');
 const DOMPurify = require('dompurify');
 const textAnalysisService = require('../services/textAnalysisService');
+const MaterialUI = require('@mui/material');
+
+const {
+    Box,
+    Paper,
+    IconButton,
+    Typography,
+    Tooltip,
+    Divider,
+    TextField,
+    Menu,
+    MenuItem
+} = MaterialUI;
+
+const {
+    FormatBold,
+    FormatItalic,
+    FormatUnderlined,
+    FormatListBulleted,
+    FormatListNumbered,
+    InsertLink,
+    Image,
+    TableChart,
+    Code,
+    Save,
+    Undo,
+    Redo,
+    MoreVert
+} = MaterialUI.Icons;
 
 const DocumentEditor = ({
     content,
@@ -19,6 +48,8 @@ const DocumentEditor = ({
     const editorRef = React.useRef(null);
     const previewRef = React.useRef(null);
     const debounceTimeout = React.useRef(null);
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [selectedText, setSelectedText] = React.useState('');
 
     // Monaco editor options
     const editorOptions = {
@@ -138,19 +169,142 @@ const DocumentEditor = ({
         }
     }, [suggestions, glossaryTerms, highlightedTerms]);
 
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    const handleFormatting = (format) => {
+        // TODO: Implement formatting logic
+        handleMenuClose();
+    };
+
+    const handleSave = () => {
+        // TODO: Implement save logic
+    };
+
+    const EditorToolbar = () => (
+        <Box className="editor-toolbar" sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Tooltip title="Save (Ctrl+S)">
+                    <IconButton className="action-button" onClick={handleSave}>
+                        <Save />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Undo (Ctrl+Z)">
+                    <IconButton className="action-button">
+                        <Undo />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Redo (Ctrl+Y)">
+                    <IconButton className="action-button">
+                        <Redo />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Tooltip title="Bold (Ctrl+B)">
+                    <IconButton className="action-button">
+                        <FormatBold />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Italic (Ctrl+I)">
+                    <IconButton className="action-button">
+                        <FormatItalic />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Underline (Ctrl+U)">
+                    <IconButton className="action-button">
+                        <FormatUnderlined />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Tooltip title="Bullet List">
+                    <IconButton className="action-button">
+                        <FormatListBulleted />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Numbered List">
+                    <IconButton className="action-button">
+                        <FormatListNumbered />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
+            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Tooltip title="Insert Link">
+                    <IconButton className="action-button">
+                        <InsertLink />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Insert Image">
+                    <IconButton className="action-button">
+                        <Image />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Insert Table">
+                    <IconButton className="action-button">
+                        <TableChart />
+                    </IconButton>
+                </Tooltip>
+                <Tooltip title="Insert Code Block">
+                    <IconButton className="action-button">
+                        <Code />
+                    </IconButton>
+                </Tooltip>
+            </Box>
+
+            <Box sx={{ flexGrow: 1 }} />
+
+            <Tooltip title="More Options">
+                <IconButton className="action-button" onClick={handleMenuOpen}>
+                    <MoreVert />
+                </IconButton>
+            </Tooltip>
+
+            <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+            >
+                <MenuItem onClick={() => handleFormatting('heading1')}>Heading 1</MenuItem>
+                <MenuItem onClick={() => handleFormatting('heading2')}>Heading 2</MenuItem>
+                <MenuItem onClick={() => handleFormatting('heading3')}>Heading 3</MenuItem>
+                <Divider />
+                <MenuItem onClick={() => handleFormatting('quote')}>Block Quote</MenuItem>
+                <MenuItem onClick={() => handleFormatting('code')}>Code Block</MenuItem>
+            </Menu>
+        </Box>
+    );
+
     return (
         <div className="document-editor">
             {!previewMode ? (
-                <MonacoEditor
-                    height="100%"
-                    language="markdown"
-                    value={editorContent}
-                    options={editorOptions}
-                    onChange={handleEditorChange}
-                    onMount={(editor) => {
-                        editorRef.current = editor;
-                    }}
-                />
+                <Paper className="editor-container" elevation={0} sx={{ height: '100%', bgcolor: 'background.paper' }}>
+                    <EditorToolbar />
+                    <MonacoEditor
+                        height="100%"
+                        language="markdown"
+                        value={editorContent}
+                        options={editorOptions}
+                        onChange={handleEditorChange}
+                        onMount={(editor) => {
+                            editorRef.current = editor;
+                        }}
+                    />
+                </Paper>
             ) : (
                 <div 
                     ref={previewRef}
@@ -287,6 +441,22 @@ const styles = `
 
 .suggestions-panel li:last-child {
     border-bottom: none;
+}
+
+.editor-toolbar {
+    padding: 8px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.action-button {
+    padding: 4px;
+    border-radius: 4px;
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+.action-button:hover {
+    background-color: #e0e0e0;
 }
 `;
 

@@ -16,6 +16,14 @@ import {
     Alert,
     IconButton,
     Tooltip,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemSecondaryAction
 } from '@mui/material';
 import {
     Brightness4,
@@ -38,6 +46,20 @@ const SettingsPanel = ({ settingsService, onClose }) => {
     const [fonts, setFonts] = useState([]);
     const [apiKeyValidation, setApiKeyValidation] = useState({});
     const [saveStatus, setSaveStatus] = useState(null);
+    const [editorSettings, setEditorSettings] = useState({
+        theme: 'dark',
+        fontSize: 14,
+        fontFamily: 'Consolas',
+        autoSave: true,
+        autoSaveInterval: 5,
+        spellCheck: true,
+        aiSuggestions: true,
+        aiSuggestionDelay: 1000,
+        indentSize: 4,
+        wordWrap: true,
+        lineNumbers: true,
+        highlightCurrentLine: true
+    });
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -88,6 +110,22 @@ const SettingsPanel = ({ settingsService, onClose }) => {
             setSaveStatus({ type: 'error', message: `Failed to reset settings: ${error.message}` });
         }
     };
+
+    const handleChange = (setting, value) => {
+        setEditorSettings(prev => ({
+            ...prev,
+            [setting]: value
+        }));
+    };
+
+    const fontFamilies = [
+        'Consolas',
+        'Courier New',
+        'Monaco',
+        'Source Code Pro',
+        'Fira Code',
+        'JetBrains Mono'
+    ];
 
     if (!settings) return null;
 
@@ -325,6 +363,171 @@ const SettingsPanel = ({ settingsService, onClose }) => {
         </Box>
     );
 
+    const renderEditorSettings = () => (
+        <Dialog
+            open={true}
+            maxWidth="md"
+            fullWidth
+            PaperProps={{
+                sx: {
+                    bgcolor: 'background.paper',
+                    backgroundImage: 'none'
+                }
+            }}
+        >
+            <DialogTitle>
+                <Typography variant="h6">Editor Settings</Typography>
+            </DialogTitle>
+            <DialogContent dividers>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                        Editor
+                    </Typography>
+                    <FormControl fullWidth variant="outlined" size="small">
+                        <InputLabel>Theme</InputLabel>
+                        <Select
+                            value={editorSettings.theme}
+                            onChange={(e) => handleChange('theme', e.target.value)}
+                            label="Theme"
+                        >
+                            <MenuItem value="dark">Dark</MenuItem>
+                            <MenuItem value="light">Light</MenuItem>
+                        </Select>
+                    </FormControl>
+                    
+                    <FormControl fullWidth variant="outlined" size="small">
+                        <InputLabel>Font Family</InputLabel>
+                        <Select
+                            value={editorSettings.fontFamily}
+                            onChange={(e) => handleChange('fontFamily', e.target.value)}
+                            label="Font Family"
+                        >
+                            {fontFamilies.map(font => (
+                                <MenuItem key={font} value={font}>{font}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
+                    <TextField
+                        label="Font Size"
+                        type="number"
+                        value={editorSettings.fontSize}
+                        onChange={(e) => handleChange('fontSize', parseInt(e.target.value))}
+                        size="small"
+                        InputProps={{ inputProps: { min: 8, max: 32 } }}
+                    />
+
+                    <TextField
+                        label="Indent Size"
+                        type="number"
+                        value={editorSettings.indentSize}
+                        onChange={(e) => handleChange('indentSize', parseInt(e.target.value))}
+                        size="small"
+                        InputProps={{ inputProps: { min: 2, max: 8 } }}
+                    />
+
+                    <Divider />
+
+                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
+                        Features
+                    </Typography>
+
+                    <List disablePadding>
+                        <ListItem>
+                            <ListItemText 
+                                primary="Auto Save"
+                                secondary={`Save changes automatically every ${editorSettings.autoSaveInterval} minutes`}
+                            />
+                            <ListItemSecondaryAction>
+                                <Switch
+                                    edge="end"
+                                    checked={editorSettings.autoSave}
+                                    onChange={(e) => handleChange('autoSave', e.target.checked)}
+                                />
+                            </ListItemSecondaryAction>
+                        </ListItem>
+
+                        <ListItem>
+                            <ListItemText 
+                                primary="Spell Check"
+                                secondary="Check spelling while typing"
+                            />
+                            <ListItemSecondaryAction>
+                                <Switch
+                                    edge="end"
+                                    checked={editorSettings.spellCheck}
+                                    onChange={(e) => handleChange('spellCheck', e.target.checked)}
+                                />
+                            </ListItemSecondaryAction>
+                        </ListItem>
+
+                        <ListItem>
+                            <ListItemText 
+                                primary="AI Suggestions"
+                                secondary="Show AI-powered writing suggestions"
+                            />
+                            <ListItemSecondaryAction>
+                                <Switch
+                                    edge="end"
+                                    checked={editorSettings.aiSuggestions}
+                                    onChange={(e) => handleChange('aiSuggestions', e.target.checked)}
+                                />
+                            </ListItemSecondaryAction>
+                        </ListItem>
+
+                        <ListItem>
+                            <ListItemText 
+                                primary="Word Wrap"
+                                secondary="Wrap long lines to fit the window"
+                            />
+                            <ListItemSecondaryAction>
+                                <Switch
+                                    edge="end"
+                                    checked={editorSettings.wordWrap}
+                                    onChange={(e) => handleChange('wordWrap', e.target.checked)}
+                                />
+                            </ListItemSecondaryAction>
+                        </ListItem>
+
+                        <ListItem>
+                            <ListItemText 
+                                primary="Line Numbers"
+                                secondary="Show line numbers in the editor"
+                            />
+                            <ListItemSecondaryAction>
+                                <Switch
+                                    edge="end"
+                                    checked={editorSettings.lineNumbers}
+                                    onChange={(e) => handleChange('lineNumbers', e.target.checked)}
+                                />
+                            </ListItemSecondaryAction>
+                        </ListItem>
+
+                        <ListItem>
+                            <ListItemText 
+                                primary="Highlight Current Line"
+                                secondary="Highlight the line where the cursor is"
+                            />
+                            <ListItemSecondaryAction>
+                                <Switch
+                                    edge="end"
+                                    checked={editorSettings.highlightCurrentLine}
+                                    onChange={(e) => handleChange('highlightCurrentLine', e.target.checked)}
+                                />
+                            </ListItemSecondaryAction>
+                        </ListItem>
+                    </List>
+                </Box>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose}>Cancel</Button>
+                <Button variant="contained" color="primary" onClick={onClose}>
+                    Save Changes
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+
     return (
         <Box sx={{ width: '100%', maxWidth: 600, mx: 'auto', p: 3 }}>
             <Typography variant="h4" gutterBottom>Settings</Typography>
@@ -350,6 +553,7 @@ const SettingsPanel = ({ settingsService, onClose }) => {
                 <Tab icon={<Code />} label="AI" />
                 <Tab icon={<Security />} label="Security" />
                 <Tab icon={<Accessibility />} label="Accessibility" />
+                <Tab icon={<Code />} label="Editor" />
             </Tabs>
 
             <Box sx={{ mt: 2 }}>
@@ -357,6 +561,7 @@ const SettingsPanel = ({ settingsService, onClose }) => {
                 {currentTab === 1 && renderAISettings()}
                 {currentTab === 2 && renderSecuritySettings()}
                 {currentTab === 3 && renderAccessibilitySettings()}
+                {currentTab === 4 && renderEditorSettings()}
             </Box>
 
             <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
@@ -367,7 +572,8 @@ const SettingsPanel = ({ settingsService, onClose }) => {
                         currentTab === 0 ? 'general' :
                         currentTab === 1 ? 'ai' :
                         currentTab === 2 ? 'security' :
-                        'accessibility'
+                        currentTab === 3 ? 'accessibility' :
+                        'editor'
                     )}
                 >
                     Reset Current Settings

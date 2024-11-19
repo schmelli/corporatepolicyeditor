@@ -1,6 +1,28 @@
-const React = require('react');
-const { DndProvider, useDrag, useDrop } = require('react-dnd');
-const { HTML5Backend } = require('react-dnd-html5-backend');
+import React from 'react';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { 
+    TreeView, 
+    TreeItem, 
+    Box, 
+    IconButton, 
+    Typography, 
+    Tooltip, 
+    Select, 
+    MenuItem, 
+    FormControl, 
+    InputLabel 
+} from '@material-ui/core';
+import { 
+    ExpandMore, 
+    ChevronRight, 
+    Add, 
+    Delete, 
+    Edit, 
+    Description, 
+    Folder, 
+    FolderOpen 
+} from '@material-ui/icons';
 
 const TreeNode = ({ node, level, onMove, onSelect, selectedId }) => {
     const [{ isDragging }, drag] = useDrag({
@@ -113,45 +135,177 @@ const TreeNode = ({ node, level, onMove, onSelect, selectedId }) => {
     );
 };
 
-const DocumentStructureTree = ({ 
-    structure,
-    onMove,
-    onSelect,
-    selectedId,
-    numberingScheme,
-    onChangeNumberingScheme
-}) => {
+const DocumentStructureTree = ({ onSelect, numberingScheme, onChangeNumberingScheme }) => {
+    const [expanded, setExpanded] = React.useState(['root']);
+    const [selected, setSelected] = React.useState('');
+    const [nodes, setNodes] = React.useState([
+        {
+            id: 'root',
+            name: 'Project Root',
+            type: 'folder',
+            children: [
+                {
+                    id: 'section1',
+                    name: 'Section 1',
+                    type: 'folder',
+                    children: [
+                        {
+                            id: 'doc1',
+                            name: 'Introduction.md',
+                            type: 'document'
+                        },
+                        {
+                            id: 'doc2',
+                            name: 'Overview.md',
+                            type: 'document'
+                        }
+                    ]
+                },
+                {
+                    id: 'section2',
+                    name: 'Section 2',
+                    type: 'folder',
+                    children: [
+                        {
+                            id: 'doc3',
+                            name: 'Details.md',
+                            type: 'document'
+                        }
+                    ]
+                }
+            ]
+        }
+    ]);
+
+    const handleToggle = (event, nodeIds) => {
+        setExpanded(nodeIds);
+    };
+
+    const handleSelect = (event, nodeId) => {
+        setSelected(nodeId);
+        if (onSelect) {
+            const node = findNode(nodes[0], nodeId);
+            if (node) {
+                onSelect(node);
+            }
+        }
+    };
+
+    const findNode = (node, id) => {
+        if (node.id === id) return node;
+        if (node.children) {
+            for (let child of node.children) {
+                const found = findNode(child, id);
+                if (found) return found;
+            }
+        }
+        return null;
+    };
+
+    const renderTree = (nodes) => (
+        nodes.map((node) => (
+            <TreeItem
+                key={node.id}
+                nodeId={node.id}
+                label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', p: 0.5, pr: 0 }}>
+                        {node.type === 'folder' ? 
+                            <FolderOpen fontSize="small" sx={{ mr: 1, color: '#dcb67a' }} /> : 
+                            <Description fontSize="small" sx={{ mr: 1, color: '#519aba' }} />
+                        }
+                        <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                            {node.name}
+                        </Typography>
+                        <Box sx={{ 
+                            opacity: 0,
+                            transition: 'opacity 0.2s',
+                            '.MuiTreeItem-content:hover &': { opacity: 1 }
+                        }}>
+                            {node.type === 'folder' && (
+                                <Tooltip title="Add Document">
+                                    <IconButton size="small" onClick={(e) => {
+                                        e.stopPropagation();
+                                        // TODO: Implement add functionality
+                                    }}>
+                                        <Add fontSize="small" />
+                                    </IconButton>
+                                </Tooltip>
+                            )}
+                            <Tooltip title="Edit">
+                                <IconButton size="small" onClick={(e) => {
+                                    e.stopPropagation();
+                                    // TODO: Implement edit functionality
+                                }}>
+                                    <Edit fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Delete">
+                                <IconButton size="small" onClick={(e) => {
+                                    e.stopPropagation();
+                                    // TODO: Implement delete functionality
+                                }}>
+                                    <Delete fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </Box>
+                    </Box>
+                }
+                sx={{
+                    '& .MuiTreeItem-content': {
+                        padding: '2px 8px',
+                        borderRadius: 1,
+                        '&:hover': {
+                            bgcolor: 'action.hover'
+                        },
+                        '&.Mui-selected': {
+                            bgcolor: 'primary.main',
+                            '&:hover': {
+                                bgcolor: 'primary.dark'
+                            }
+                        }
+                    }
+                }}
+            >
+                {Array.isArray(node.children) ? node.children.map((node) => renderTree([node])) : null}
+            </TreeItem>
+        ))
+    );
+
     return (
-        <DndProvider backend={HTML5Backend}>
-            <div className="document-structure-tree">
-                <div className="numbering-scheme-selector">
-                    <select 
-                        value={numberingScheme}
-                        onChange={(e) => onChangeNumberingScheme(e.target.value)}
-                        className="scheme-select"
-                    >
-                        <option value="decimal">1.2.3.4</option>
-                        <option value="alphaUpper">A.B.C.D</option>
-                        <option value="alphaLower">a.b.c.d</option>
-                        <option value="roman">I.II.III.IV</option>
-                        <option value="hybrid1">1.A.1.a</option>
-                        <option value="hybrid2">1.1.1.1 (Legal)</option>
-                    </select>
-                </div>
-                <div className="tree-container">
-                    {structure.map((node, index) => (
-                        <TreeNode
-                            key={node.id}
-                            node={node}
-                            level={0}
-                            onMove={onMove}
-                            onSelect={onSelect}
-                            selectedId={selectedId}
-                        />
-                    ))}
-                </div>
-            </div>
-        </DndProvider>
+        <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <FormControl variant="standard" sx={{ m: 1, minWidth: 120 }}>
+                <InputLabel>Numbering Scheme</InputLabel>
+                <Select
+                    value={numberingScheme || 'decimal'}
+                    onChange={(e) => onChangeNumberingScheme?.(e.target.value)}
+                    label="Numbering Scheme"
+                >
+                    <MenuItem value="decimal">1.2.3.4</MenuItem>
+                    <MenuItem value="alpha">A.B.C.D</MenuItem>
+                    <MenuItem value="roman">I.II.III.IV</MenuItem>
+                    <MenuItem value="hybrid1">1.A.1.a</MenuItem>
+                    <MenuItem value="hybrid2">1.1.1.1 (Legal)</MenuItem>
+                </Select>
+            </FormControl>
+            <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
+                <TreeView
+                    aria-label="document structure"
+                    defaultCollapseIcon={<ExpandMore />}
+                    defaultExpandIcon={<ChevronRight />}
+                    expanded={expanded}
+                    selected={selected}
+                    onNodeToggle={handleToggle}
+                    onNodeSelect={handleSelect}
+                    sx={{
+                        flexGrow: 1,
+                        maxWidth: 400,
+                        overflowY: 'auto'
+                    }}
+                >
+                    {renderTree(nodes)}
+                </TreeView>
+            </Box>
+        </Box>
     );
 };
 

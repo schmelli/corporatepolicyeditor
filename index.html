@@ -1,53 +1,254 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Corporate Policy Editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Policy Document Editor</title>
+    
+    <!-- Material UI -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    
+    <!-- React and Material UI -->
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@mui/material@5.0.0/umd/material-ui.development.js"></script>
+    
+    <!-- Other Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/2.0.3/marked.min.js"></script>
+    
+    <!-- Custom Styles -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app">
-        <div class="main-container">
-            <!-- Document List Panel -->
-            <div class="panel document-list">
-                <div class="panel-header">Documents</div>
-                <div id="documentList"></div>
-            </div>
+    <div id="root"></div>
 
-            <!-- Document Structure Panel -->
-            <div class="panel document-structure">
-                <div class="panel-header">Document Structure</div>
-                <div id="documentStructure"></div>
-            </div>
+    <!-- Load React Components -->
+    <script type="text/babel" src="components/DocumentEditor.js"></script>
+    <script type="text/babel" src="components/SettingsPanel.js"></script>
+    <script type="text/babel" src="components/SharedDocumentViewer.js"></script>
+    <script type="text/babel" src="components/DocumentStructureTree.js"></script>
+    <script type="text/babel" src="components/VersionHistory.js"></script>
+    <script type="text/babel" src="components/PrintPreview.js"></script>
 
-            <!-- Editor/Preview Panel -->
-            <div class="panel editor-preview">
-                <div class="panel-header">
-                    <div class="tab-group">
-                        <button class="tab active" data-tab="editor">Editor</button>
-                        <button class="tab" data-tab="preview">Preview</button>
-                    </div>
-                </div>
-                <div id="editorContainer"></div>
-                <div id="previewContainer" style="display: none;"></div>
-            </div>
+    <!-- Main App -->
+    <script type="text/babel">
+        const { 
+            Box, 
+            CssBaseline, 
+            ThemeProvider, 
+            createTheme,
+            AppBar,
+            Toolbar,
+            Typography,
+            IconButton,
+            Drawer,
+            List,
+            ListItem,
+            ListItemIcon,
+            ListItemText,
+            Divider,
+            Button,
+            Menu,
+            MenuItem,
+            useMediaQuery,
+            Paper
+        } = MaterialUI;
 
-            <!-- AI Chat Panel -->
-            <div class="panel ai-chat">
-                <div class="panel-header">
-                    <span>AI Assistant</span>
-                    <button class="minimize-chat">_</button>
-                </div>
-                <div class="chat-container">
-                    <div id="chatMessages"></div>
-                    <div class="chat-input">
-                        <textarea id="chatInput" placeholder="Ask me anything about your documents..."></textarea>
-                        <button id="sendMessage">Send</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="renderer.js"></script>
+        const { 
+            Menu: MenuIcon,
+            Description,
+            Add,
+            Settings,
+            Share,
+            History,
+            Print,
+            FolderOpen,
+            Save,
+            CloudUpload,
+            DarkMode,
+            LightMode
+        } = MaterialUI.Icons;
+
+        const drawerWidth = 240;
+
+        const App = () => {
+            const [darkMode, setDarkMode] = React.useState(true);
+            const [mobileOpen, setMobileOpen] = React.useState(false);
+            const [currentDocument, setCurrentDocument] = React.useState(null);
+            const [settingsOpen, setSettingsOpen] = React.useState(false);
+            const isMobile = useMediaQuery('(max-width:600px)');
+
+            const theme = createTheme({
+                palette: {
+                    mode: darkMode ? 'dark' : 'light',
+                    background: {
+                        default: darkMode ? '#1e1e1e' : '#ffffff',
+                        paper: darkMode ? '#252526' : '#f5f5f5'
+                    },
+                    primary: {
+                        main: '#007acc'
+                    }
+                },
+            });
+
+            const handleDrawerToggle = () => {
+                setMobileOpen(!mobileOpen);
+            };
+
+            const drawer = (
+                <Box>
+                    <Toolbar />
+                    <List>
+                        <ListItem button onClick={() => {}}>
+                            <ListItemIcon>
+                                <Add />
+                            </ListItemIcon>
+                            <ListItemText primary="New Document" />
+                        </ListItem>
+                        <ListItem button onClick={() => {}}>
+                            <ListItemIcon>
+                                <FolderOpen />
+                            </ListItemIcon>
+                            <ListItemText primary="Open Document" />
+                        </ListItem>
+                        <ListItem button onClick={() => {}}>
+                            <ListItemIcon>
+                                <Save />
+                            </ListItemIcon>
+                            <ListItemText primary="Save" />
+                        </ListItem>
+                    </List>
+                    <Divider />
+                    <List>
+                        <ListItem button onClick={() => setSettingsOpen(true)}>
+                            <ListItemIcon>
+                                <Settings />
+                            </ListItemIcon>
+                            <ListItemText primary="Settings" />
+                        </ListItem>
+                        <ListItem button onClick={() => {}}>
+                            <ListItemIcon>
+                                <Share />
+                            </ListItemIcon>
+                            <ListItemText primary="Share" />
+                        </ListItem>
+                        <ListItem button onClick={() => {}}>
+                            <ListItemIcon>
+                                <History />
+                            </ListItemIcon>
+                            <ListItemText primary="Version History" />
+                        </ListItem>
+                    </List>
+                </Box>
+            );
+
+            return (
+                <ThemeProvider theme={theme}>
+                    <CssBaseline />
+                    <Box sx={{ display: 'flex', height: '100vh' }}>
+                        <AppBar
+                            position="fixed"
+                            sx={{
+                                width: { sm: `calc(100% - ${drawerWidth}px)` },
+                                ml: { sm: `${drawerWidth}px` },
+                                bgcolor: theme.palette.background.paper,
+                                borderBottom: `1px solid ${theme.palette.divider}`
+                            }}
+                            elevation={0}
+                        >
+                            <Toolbar>
+                                <IconButton
+                                    color="inherit"
+                                    edge="start"
+                                    onClick={handleDrawerToggle}
+                                    sx={{ mr: 2, display: { sm: 'none' } }}
+                                >
+                                    <MenuIcon />
+                                </IconButton>
+                                <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+                                    {currentDocument ? currentDocument.name : 'No Document Open'}
+                                </Typography>
+                                <IconButton color="inherit" onClick={() => setDarkMode(!darkMode)}>
+                                    {darkMode ? <LightMode /> : <DarkMode />}
+                                </IconButton>
+                            </Toolbar>
+                        </AppBar>
+                        <Box
+                            component="nav"
+                            sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+                        >
+                            <Drawer
+                                variant="temporary"
+                                open={mobileOpen}
+                                onClose={handleDrawerToggle}
+                                ModalProps={{
+                                    keepMounted: true, // Better mobile performance
+                                }}
+                                sx={{
+                                    display: { xs: 'block', sm: 'none' },
+                                    '& .MuiDrawer-paper': { 
+                                        boxSizing: 'border-box', 
+                                        width: drawerWidth,
+                                        bgcolor: theme.palette.background.paper
+                                    },
+                                }}
+                            >
+                                {drawer}
+                            </Drawer>
+                            <Drawer
+                                variant="permanent"
+                                sx={{
+                                    display: { xs: 'none', sm: 'block' },
+                                    '& .MuiDrawer-paper': { 
+                                        boxSizing: 'border-box', 
+                                        width: drawerWidth,
+                                        bgcolor: theme.palette.background.paper
+                                    },
+                                }}
+                                open
+                            >
+                                {drawer}
+                            </Drawer>
+                        </Box>
+                        <Box
+                            component="main"
+                            sx={{
+                                flexGrow: 1,
+                                p: 3,
+                                width: { sm: `calc(100% - ${drawerWidth}px)` },
+                                mt: '64px',
+                                height: 'calc(100vh - 64px)',
+                                overflow: 'auto',
+                                bgcolor: theme.palette.background.default
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', height: '100%' }}>
+                                <Box sx={{ width: '250px', mr: 2, display: { xs: 'none', md: 'block' } }}>
+                                    <Paper sx={{ height: '100%', p: 2 }}>
+                                        <Typography variant="h6" gutterBottom>
+                                            Document Structure
+                                        </Typography>
+                                        <DocumentStructureTree />
+                                    </Paper>
+                                </Box>
+                                <Box sx={{ flexGrow: 1 }}>
+                                    <DocumentEditor />
+                                </Box>
+                            </Box>
+                        </Box>
+                    </Box>
+                    <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+                </ThemeProvider>
+            );
+        };
+
+        ReactDOM.render(
+            <App />,
+            document.getElementById('root')
+        );
+    </script>
 </body>
 </html>
