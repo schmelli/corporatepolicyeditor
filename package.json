@@ -1,0 +1,28 @@
+{
+  "name": "corporate-policy-editor",
+  "version": "1.0.0",
+  "description": "An IDE-like editor for corporate policy documents with AI assistance",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --debug"
+  },
+  "dependencies": {
+    "electron": "^25.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@monaco-editor/react": "^4.5.1",
+    "prosemirror-state": "^1.4.3",
+    "prosemirror-view": "^1.31.7",
+    "prosemirror-model": "^1.19.3",
+    "docx": "^8.2.2",
+    "pdfkit": "^0.13.0",
+    "marked": "^5.0.2",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.1",
+    "@babel/preset-react": "^7.22.3",
+    "electron-builder": "^24.4.0"
+  }
+}

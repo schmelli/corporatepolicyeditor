@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Corporate Policy Editor</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <div class="main-container">
+            <!-- Document List Panel -->
+            <div class="panel document-list">
+                <div class="panel-header">Documents</div>
+                <div id="documentList"></div>
+            </div>
+
+            <!-- Document Structure Panel -->
+            <div class="panel document-structure">
+                <div class="panel-header">Document Structure</div>
+                <div id="documentStructure"></div>
+            </div>
+
+            <!-- Editor/Preview Panel -->
+            <div class="panel editor-preview">
+                <div class="panel-header">
+                    <div class="tab-group">
+                        <button class="tab active" data-tab="editor">Editor</button>
+                        <button class="tab" data-tab="preview">Preview</button>
+                    </div>
+                </div>
+                <div id="editorContainer"></div>
+                <div id="previewContainer" style="display: none;"></div>
+            </div>
+
+            <!-- AI Chat Panel -->
+            <div class="panel ai-chat">
+                <div class="panel-header">
+                    <span>AI Assistant</span>
+                    <button class="minimize-chat">_</button>
+                </div>
+                <div class="chat-container">
+                    <div id="chatMessages"></div>
+                    <div class="chat-input">
+                        <textarea id="chatInput" placeholder="Ask me anything about your documents..."></textarea>
+                        <button id="sendMessage">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>
