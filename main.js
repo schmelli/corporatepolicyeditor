@@ -1,49 +1,17 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const express = require('express');
 const path = require('path');
 
-function createWindow() {
-    const mainWindow = new BrowserWindow({
-        width: 1600,
-        height: 1000,
-        webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
-        }
-    });
+const app = express();
+const port = process.env.PORT || 3000;
 
-    mainWindow.loadFile('index.html');
-    
-    // Open DevTools in development mode
-    if (process.argv.includes('--debug')) {
-        mainWindow.webContents.openDevTools();
-    }
-}
+// Serve static files
+app.use(express.static(path.join(__dirname)));
 
-app.whenReady().then(() => {
-    createWindow();
-
-    app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) {
-            createWindow();
-        }
-    });
+// Serve index.html for all routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.on('window-all-closed', function () {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
-
-// IPC handlers for document operations
-ipcMain.handle('save-document', async (event, document) => {
-    // TODO: Implement document saving
-});
-
-ipcMain.handle('load-document', async (event, documentId) => {
-    // TODO: Implement document loading
-});
-
-ipcMain.handle('export-document', async (event, { document, format }) => {
-    // TODO: Implement document export
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
 });
